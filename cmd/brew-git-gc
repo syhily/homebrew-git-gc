@@ -1,21 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 #: * `git-gc`:
 #:
 #: Perform git gc on all brew taps and brew core repository.
+#: not dependencies of another installed formula.
 
-HOMEBREW_REPOSITORY="$(brew --repository 2>/dev/null || true)"
-HOMEBREW_LIBRARY="$HOMEBREW_REPOSITORY/Library"
+set -o errexit
+set -o nounset
 
 get_repo_size() {
-  du -sk .git | awk '{print $1}'
+  /usr/bin/du -sk .git | /usr/bin/awk '{print $1}'
 }
 
 options="$@"
 total_previous_size=0
 total_current_size=0
 
-for dir in "$HOMEBREW_REPOSITORY" "$HOMEBREW_LIBRARY"/Taps/*/*; do
+for dir in "$HOMEBREW_REPOSITORY" "$HOMEBREW_LIBRARY_PATH"/../Taps/*/*; do
   [[ -d "$dir/.git" ]] || continue
   cd "$dir" || continue
 
@@ -25,7 +26,7 @@ for dir in "$HOMEBREW_REPOSITORY" "$HOMEBREW_LIBRARY"/Taps/*/*; do
   (( total_previous_size += previous_size ))
 
   echo "$ git gc ${options}"
-  git gc ${options}
+  /usr/bin/git gc ${options}
 
   current_size=$(get_repo_size)
   (( total_current_size += current_size ))
